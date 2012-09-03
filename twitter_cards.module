@@ -6,7 +6,7 @@
  */
 
 /**
-* Implementation of hook_permission().
+* Implements of hook_permission().
 */
 function twitter_cards_permission() {
   return array(
