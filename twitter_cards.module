@@ -177,9 +177,9 @@ function twitter_cards_preprocess_node(&$variables) {
     // Use the entity field.
     $image_field_uri = $variables[$image_field][0]['uri'];
     if ($image_field_uri != '') {
-      // If this is a photo card then we need to specify the width and
-      // height of the original image. We also want to return the
-      // original for a photo card and a thumbnail preview if a summary
+      // If a photo card then we need to specify the x/y of the original image.
+      // We also want to return the original for a photo card.
+      // As well as a thumbnail preview if a summary
       if (variable_get('twitter_cards_' . $variables['type'] . '_card_type', 'summary') == 'photo') {
         $image_path = file_create_url($variables[$image_field][0]['uri']);
 
