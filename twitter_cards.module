@@ -6,8 +6,8 @@
  */
 
 /**
-* Implements of hook_permission().
-*/
+ * Implements of hook_permission().
+ */
 function twitter_cards_permission() {
   return array(
     'administer twitter cards' => array(
@@ -33,8 +33,8 @@ function twitter_cards_menu() {
 
 
 /**
-* Modules settings form.
-*/
+ * Modules settings form.
+ */
 function twitter_cards_settings() {
 
   $form_item_preffix = 'twitter_cards_';
@@ -171,10 +171,10 @@ function twitter_cards_preprocess_node(&$variables){
     $image_field_uri = $variables[$image_field][0]['uri'];
     if ($image_field_uri != '') {
       /**
-      * If this is a photo card then we need to specify the width and
-      * height of the original image. We also want to return the
-      * original for a photo card and a thumbnail preview if a summary
-      */
+       * If this is a photo card then we need to specify the width and
+       * height of the original image. We also want to return the
+       * original for a photo card and a thumbnail preview if a summary
+       */
       if (variable_get('twitter_cards_'.$variables['type'].'_card_type', 'summary') == 'photo') {
         $image_path = file_create_url($variables[$image_field][0]['uri']);
 
