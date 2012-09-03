@@ -156,7 +156,7 @@ function twitter_cards_preprocess_node(&$variables) {
   );
   drupal_add_html_head($element, 'twitter_cards_title');
 
-  //Example: twitter:description.
+  // Example: twitter:description.
   $element = array(
     '#tag' => 'meta',
     '#attributes' => array(
@@ -172,15 +172,14 @@ function twitter_cards_preprocess_node(&$variables) {
   if ($image_field == 'logo') {
     // Use the site logo if set.
     $image_path = file_create_url(drupal_get_path('module', 'twitter_cards') . '/logo.png');
-  } else {
+  }
+  else {
     // Use the entity field.
     $image_field_uri = $variables[$image_field][0]['uri'];
     if ($image_field_uri != '') {
-      /**
-       * If this is a photo card then we need to specify the width and
-       * height of the original image. We also want to return the
-       * original for a photo card and a thumbnail preview if a summary
-       */
+      // If this is a photo card then we need to specify the width and
+      // height of the original image. We also want to return the
+      // original for a photo card and a thumbnail preview if a summary
       if (variable_get('twitter_cards_' . $variables['type'] . '_card_type', 'summary') == 'photo') {
         $image_path = file_create_url($variables[$image_field][0]['uri']);
 
