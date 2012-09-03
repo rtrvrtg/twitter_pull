@@ -121,6 +121,9 @@ function twitter_cards_settings() {
   return system_settings_form($form);
 }
 
+/**
+ * Implements hook_preprocess_node().
+ */
 function twitter_cards_preprocess_node(&$variables){
 
   // Example: twitter:card.
