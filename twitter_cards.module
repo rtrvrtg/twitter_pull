@@ -1,0 +1,288 @@
+<?php
+
+/*
+** Implementation of hook_perm
+*/
+function twitter_cards_permission() {
+  return array(
+    'administer twitter cards' => array(
+      'title' => t('Administer Twitter cards'),
+      'description' => t('Set what content types should have Twitter cards meta tags.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function twitter_cards_menu() {
+  $items['admin/config/services/twitter-cards'] = array(
+    'title' => 'Twitter cards',
+    'description' => 'Choose what content should allow Twitter cards to be shown for.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('twitter_cards_settings'),
+    'access arguments' => array('administer twitter cards'),
+  );
+  return $items;
+}
+
+
+/*
+** Modules settings form
+*/
+function twitter_cards_settings() {
+
+  $form_item_preffix = 'twitter_cards_';
+
+  $form = array();
+
+    $form['sitewide'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Site wide settings'),
+    );
+
+    $form['sitewide'][$form_item_preffix.'_sitewide'] = array(
+      '#title' => t('Site Twitter username'),
+      '#description' => t('This is used as a fallback when the node author doesn\'t have a Twitter account.'),
+      '#type' => 'textfield',
+      '#required' => TRUE,
+      '#default_value' => variable_get($form_item_preffix.'_sitewide', 'drupal'),
+    );
+
+  //Find all node content types
+  $node_types = node_type_get_types();
+
+  //Loop through each content type and give it options
+  foreach ($node_types as $key => $value) {
+
+    //Store image fields in an options array
+    $image_fields = array();
+    $image_fields['logo'] = 'Use default generic image';
+
+    //For each content type get its fields and loop through to find image fields
+    $fields_info = field_info_instances('node', $key);
+    foreach ($fields_info as $field_name => $data) {
+      $field_info = field_info_field($field_name);
+      if ($field_info['type'] == 'image') {
+        $image_fields[$field_info['field_name']] = $data['label'];
+      }
+    }
+
+    //Simple fieldset to wrap the content type options
+    $form[$key] = array(
+      '#type' => 'fieldset',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#title' => t($value->name),
+    );
+
+    $form[$key][$form_item_preffix.$key.'_card_type'] = array(
+      '#title' => t('Display option'),
+      '#type' => 'select',
+      '#options' => array(
+        'summary' => t('Summary'),
+        'photo' => t('Photo'),
+      ),
+      '#default_value' => variable_get($form_item_preffix.$key.'_card_type', 'summary'),
+    );
+
+    $form[$key][$form_item_preffix.$key.'_image_field'] = array(
+      '#title' => t('Select image field'),
+      '#description' => t('Which image field on this content type should be used as the preview image on Twitter. If there is no field or one is not selected then the site logo will be used.'),
+      '#type' => 'select',
+      '#options' => $image_fields,
+      '#default_value' => variable_get($form_item_preffix.$key.'_image_field', ''),
+    );
+
+    //If users can set their personal twitter accounts in their profile then allow them to use those
+    if (module_exists('twitter')) {
+      $form[$key][$form_item_preffix.$key.'_user_handle'] = array(
+        '#title' => t('Show authors Twitter username'),
+        '#description' => t('If checked and the user has at least one Twitter account associeted with thier profile then checking this will use the first one as the author of this post.'),
+        '#type' => 'checkbox',
+        '#options' => array(
+          0 => t('No'),
+          1 => t('Yes'),
+        ),
+        '#default_value' => variable_get($form_item_preffix.$key.'_user_handle', ''),
+      );
+    }
+
+  }
+
+  return system_settings_form($form);
+}
+
+function twitter_cards_preprocess_node(&$variables){
+
+  //die('<pre>1'.print_r($variables['field_image'] , true).'</pre>');
+
+  //twitter:card
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'twitter:card',
+      'content' => variable_get('twitter_cards_'.$variables['type'].'_card_type', 'summary'),
+    ),
+  );
+  drupal_add_html_head($element, 'twitter_cards_card');
+
+  //twitter:url
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'twitter:url',
+      'content' => url('node/'.$variables['nid'], array('absolute' => TRUE)),
+    ),
+  );
+  drupal_add_html_head($element, 'twitter_cards_url');
+
+  //twitter:title
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'twitter:title',
+      'content' => $variables['title'],
+    ),
+  );
+  drupal_add_html_head($element, 'twitter_cards_title');
+
+  //twitter:description
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'twitter:description',
+      'content' => text_summary($variables['body'][0]['value'], null, 200),
+    ),
+  );
+  drupal_add_html_head($element, 'twitter_cards_description');
+
+  //Content type image settings
+  $image_field = variable_get('twitter_cards_'.$variables['type'].'_image_field', 'logo');
+
+  if ($image_field == 'logo') {
+    //Use the site logo if set
+    $image_path = file_create_url(drupal_get_path('module', 'twitter_cards').'/logo.png');
+  } else {
+    //Use the entity field
+    $image_field_uri = $variables[$image_field][0]['uri'];
+    if ($image_field_uri != '') {
+      //If this is a photo card then we need to specify the width and height of the original image
+      //We also want to return the original for a photo card and a thumbnail preview if a summary
+      if (variable_get('twitter_cards_'.$variables['type'].'_card_type', 'summary') == 'photo') {
+        $image_path = file_create_url($variables[$image_field][0]['uri']);
+
+        //twitter:image:width
+        $element = array(
+          '#tag' => 'meta',
+          '#attributes' => array(
+            'name' => 'twitter:image:width',
+            'content' => $variables[$image_field][0]['width'],
+          ),
+        );
+        drupal_add_html_head($element, 'twitter_cards_image_width');
+
+        //twitter:image:height
+        $element = array(
+          '#tag' => 'meta',
+          '#attributes' => array(
+            'name' => 'twitter:image:height',
+            'content' => $variables[$image_field][0]['height'],
+          ),
+        );
+        drupal_add_html_head($element, 'twitter_cards_image_height');
+
+      } else {
+
+        $image_path = image_style_url('twitter_cards_preview', file_uri_target($variables[$image_field][0]['uri']));
+        //twitter:image:width
+        $element = array(
+          '#tag' => 'meta',
+          '#attributes' => array(
+            'name' => 'twitter:image:width',
+            'content' => 120,
+          ),
+        );
+        drupal_add_html_head($element, 'twitter_cards_image_width');
+
+        //twitter:image:height
+        $element = array(
+          '#tag' => 'meta',
+          '#attributes' => array(
+            'name' => 'twitter:image:height',
+            'content' => 120,
+          ),
+        );
+        drupal_add_html_head($element, 'twitter_cards_image_height');
+
+      }
+    }
+  }
+
+  //twitter:image
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'twitter:image',
+      'content' => $image_path,
+    ),
+  );
+  drupal_add_html_head($element, 'twitter_cards_image');
+
+  //Use the sitewide Twitter account
+  //twitter:site
+  $element = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'twitter:site',
+      'content' => '@'.str_replace('@', '', variable_get('twitter_cards_sitewide', 'drupal')),
+    ),
+  );
+  drupal_add_html_head($element, 'twitter_cards_site');
+
+  $show_author = variable_get('twitter_cards_'.$variables['type'].'_user_handle', 0);
+
+  if (module_exists('twitter') && $show_author === 1) {
+    $author_twitter_handle = twitter_twitter_accounts(user_load($variables['uid']));
+    if (isset($author_twitter_handle[0]->screen_name)) {
+      //The user has a twitter account setup using the drupal.org/project/twitter module so use this
+
+      //twitter:creator
+      $element = array(
+        '#tag' => 'meta',
+        '#attributes' => array(
+          'name' => 'twitter:creator',
+          'content' => '@'.str_replace('@', '', $author_twitter_handle[0]->screen_name),
+        ),
+      );
+      drupal_add_html_head($element, 'twitter_cards_creator');
+    }
+  }
+
+}
+
+
+/**
+ * Implements hook_image_default_styles().
+ */
+function twitter_cards_image_default_styles() {
+  $styles = array();
+
+  $styles['twitter_cards_preview'] = array(
+    'effects' => array(
+      array(
+        'name' => 'image_scale',
+        'data' => array(
+          'width' => 120,
+          'height' => 120,
+          'upscale' => 1,
+        ),
+        'weight' => 0,
+      ),
+    ),
+  );
+
+  return $styles;
+}
+
+?>

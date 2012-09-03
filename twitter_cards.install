@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the twitter cards module.
+ *
+ */
+
+/**
+ * Implements hook_install().
+ */
+function twitter_cards_install() {
+  //Set a sitewide default twitter account that content is display as from on cards
+  variable_set('twitter_cards_sitewide', 'drupal');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function twitter_cards_uninstall() {
+  //Remove all the variables set by the module
+
+  variable_del('twitter_cards_sitewide');
+
+  $node_types = node_type_get_types();
+  //Loop through each content type and remove its variables
+  foreach ($node_types as $key => $value) {
+    variable_del('twitter_cards'.$key.'_card_type');
+    variable_del('twitter_cards'.$key.'_image_field');
+    variable_del('twitter_cards'.$key.'_post_date');
+    variable_del('twitter_cards'.$key.'_sitewide');
+  }
+}

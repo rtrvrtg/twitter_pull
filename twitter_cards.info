@@ -1,1 +1,4 @@
 name = Twitter cards
+description = Adds integration with the Twitter microblogging services Cards https://dev.twitter.com/docs/cards.
+core = 7.x
+configure = admin/config/services/twitter-cards
