@@ -24,8 +24,8 @@ function twitter_cards_uninstall() {
   // Loop through each content type and remove its variables.
   foreach ($node_types as $key => $value) {
     variable_del('twitter_cards' . $key . '_card_type');
-    variable_del('twitter_cards'.$key.'_image_field');
-    variable_del('twitter_cards'.$key.'_post_date');
-    variable_del('twitter_cards'.$key.'_sitewide');
+    variable_del('twitter_cards' . $key . '_image_field');
+    variable_del('twitter_cards' . $key . '_post_date');
+    variable_del('twitter_cards' . $key . '_sitewide');
   }
 }
