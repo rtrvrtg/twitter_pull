@@ -46,9 +46,9 @@ function twitter_cards_settings() {
     '#title' => t('Site wide settings'),
   );
 
-  $form['sitewide'][$form_item_preffix.'_sitewide'] = array(
+  $form['sitewide'][$form_item_preffix . '_sitewide'] = array(
     '#title' => t('Site Twitter username'),
-    '#description' => t('This is used as a fallback when the node author doesn\'t have a Twitter account.'),
+    '#description' => t("This is used as a fallback when the node author doesn't have a Twitter account."),
     '#type' => 'textfield',
     '#required' => TRUE,
     '#default_value' => variable_get($form_item_preffix . '_sitewide', 'drupal'),
@@ -64,7 +64,7 @@ function twitter_cards_settings() {
     $image_fields = array();
     $image_fields['logo'] = 'Use default generic image';
 
-    // For each content type get its fields and loop through to find image fields.
+    // Get fields of each content type and loop through to find image fields.
     $fields_info = field_info_instances('node', $key);
     foreach ($fields_info as $field_name => $data) {
       $field_info = field_info_field($field_name);
