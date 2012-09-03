@@ -99,7 +99,10 @@ function twitter_cards_settings() {
       '#default_value' => variable_get($form_item_preffix . $key . '_image_field', ''),
     );
 
-    // If users set their personal twitter accounts in their profile then allow them to use those.
+    /*
+     * If users set their personal twitter accounts in their profile
+     * then allow them to use those.
+     */
     if (module_exists('twitter')) {
       $form[$key][$form_item_preffix . $key . '_user_handle'] = array(
         '#title' => t('Show authors Twitter username'),
