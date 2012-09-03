@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * @file
+ * Main functions for the module
+ */
+
+/**
 * Implementation of hook_permission().
 */
 function twitter_cards_permission() {
