@@ -248,7 +248,7 @@ function twitter_cards_preprocess_node(&$variables) {
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'twitter:site',
-      'content' => '@'.str_replace('@', '', variable_get('twitter_cards_sitewide', 'drupal')),
+      'content' => '@' . str_replace('@', '', variable_get('twitter_cards_sitewide', 'drupal')),
     ),
   );
   drupal_add_html_head($element, 'twitter_cards_site');
@@ -258,14 +258,15 @@ function twitter_cards_preprocess_node(&$variables) {
   if (module_exists('twitter') && $show_author === 1) {
     $author_twitter_handle = twitter_twitter_accounts(user_load($variables['uid']));
     if (isset($author_twitter_handle[0]->screen_name)) {
-      // The user has a twitter account setup with drupal.org/project/twitter so use this.
-
-      // twitter:creator.
+      /**
+      * The user has a twitter account setup with drupal.org/project/twitter so use this.
+      * twitter:creator.
+      */
       $element = array(
         '#tag' => 'meta',
         '#attributes' => array(
           'name' => 'twitter:creator',
-          'content' => '@'.str_replace('@', '', $author_twitter_handle[0]->screen_name),
+          'content' => '@' . str_replace('@', '', $author_twitter_handle[0]->screen_name),
         ),
       );
       drupal_add_html_head($element, 'twitter_cards_creator');
