@@ -259,9 +259,9 @@ function twitter_cards_preprocess_node(&$variables) {
     $author_twitter_handle = twitter_twitter_accounts(user_load($variables['uid']));
     if (isset($author_twitter_handle[0]->screen_name)) {
       /**
-      * The user has a twitter account setup with drupal.org/project/twitter so use this.
-      * twitter:creator.
-      */
+       * The user has a twitter account setup with drupal.org/project/twitter so use this.
+       * twitter:creator.
+       */
       $element = array(
         '#tag' => 'meta',
         '#attributes' => array(
