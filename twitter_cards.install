@@ -3,14 +3,13 @@
 /**
  * @file
  * Install, update and uninstall functions for the twitter cards module.
- *
  */
 
 /**
  * Implements hook_install().
  */
 function twitter_cards_install() {
-  //Set a sitewide default twitter account that content is display as from on cards
+  //Set a sitewide default twitter account that content is displayed as from
   variable_set('twitter_cards_sitewide', 'drupal');
 }
 
