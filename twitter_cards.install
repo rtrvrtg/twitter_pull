@@ -31,3 +31,4 @@ function twitter_cards_uninstall() {
     variable_del('twitter_cards'.$key.'_sitewide');
   }
 }
+
