@@ -46,12 +46,12 @@ function twitter_cards_settings() {
     '#title' => t('Site wide settings'),
   );
 
-  $form['sitewide'][$form_item_preffix . '_sitewide'] = array(
+  $form['sitewide'][$form_item_preffix . 'sitewide'] = array(
     '#title' => t('Site Twitter username'),
     '#description' => t("This is used as a fallback when the node author doesn't have a Twitter account."),
     '#type' => 'textfield',
     '#required' => TRUE,
-    '#default_value' => variable_get($form_item_preffix . '_sitewide', 'drupal'),
+    '#default_value' => variable_get($form_item_preffix . 'sitewide', 'drupal'),
   );
 
   // Find all node content types.
@@ -182,31 +182,11 @@ function twitter_cards_preprocess_node(&$variables) {
       // As well as a thumbnail preview if a summary.
       if (variable_get('twitter_cards_' . $variables['type'] . '_card_type', 'summary') == 'photo') {
         $image_path = file_create_url($variables[$image_field][0]['uri']);
-
-        // twitter:image:width.
-        $element = array(
-          '#tag' => 'meta',
-          '#attributes' => array(
-            'name' => 'twitter:image:width',
-            'content' => $variables[$image_field][0]['width'],
-          ),
-        );
-        drupal_add_html_head($element, 'twitter_cards_image_width');
-
-        // twitter:image:height.
-        $element = array(
-          '#tag' => 'meta',
-          '#attributes' => array(
-            'name' => 'twitter:image:height',
-            'content' => $variables[$image_field][0]['height'],
-          ),
-        );
-        drupal_add_html_head($element, 'twitter_cards_image_height');
-
       }
       else {
 
         $image_path = image_style_url('twitter_cards_preview', file_uri_target($variables[$image_field][0]['uri']));
+
         // twitter:image:width.
         $element = array(
           '#tag' => 'meta',
@@ -228,6 +208,9 @@ function twitter_cards_preprocess_node(&$variables) {
         drupal_add_html_head($element, 'twitter_cards_image_height');
 
       }
+    }
+    else {
+      $image_path = file_create_url(drupal_get_path('module', 'twitter_cards') . '/logo.png');
     }
   }
 
