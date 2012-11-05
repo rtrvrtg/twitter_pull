@@ -179,7 +179,7 @@ function twitter_cards_preprocess_node(&$variables) {
 
       $image_field_uri = $value['uri'];
       if ($image_field_uri != '') {
-        // If a photo card then we need to specify the x/y of the original image.
+        // If a photo card then we need to specify the x/y of the image.
         // We also want to return the original for a photo card.
         // As well as a thumbnail preview if a summary.
         if (variable_get('twitter_cards_' . $variables['type'] . '_card_type', 'summary') == 'photo') {
