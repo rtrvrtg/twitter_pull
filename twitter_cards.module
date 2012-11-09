@@ -77,6 +77,7 @@ function twitter_cards_settings() {
         case 'image':
           $image_fields[$field_info['field_name']] = $data['label'];
           break;
+
         case 'text':
         case 'text_long':
         case 'text_with_summary':
@@ -177,7 +178,6 @@ function twitter_cards_preprocess_node(&$variables) {
   drupal_add_html_head($element, 'twitter_cards_title');
 
   // Example: twitter:description.
-
   // Get the first value of the chosen text field.
   variable_get('twitter_cards_' . $variables['type'] . '_text_field', variable_get('site_name'));
   $card_desc_field = variable_get('twitter_cards_' . $variables['type'] . '_text_field', '');
@@ -186,11 +186,12 @@ function twitter_cards_preprocess_node(&$variables) {
   if ($card_desc_field != '') {
     // Some fields seem to have a different structure around the language.
     $card_description = $variables[$card_desc_field][$variables['language']][0]['safe_value'];
-    // So we provide a fallback option
+    // So we provide a fallback option.
     if ($card_description == '') {
       $card_description = $variables[$card_desc_field][0]['safe_value'];
     }
-  } else {
+  }
+  else {
     $card_description = variable_get('site_name', '');
   }
 
