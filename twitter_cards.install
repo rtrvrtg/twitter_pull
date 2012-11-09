@@ -6,14 +6,6 @@
  */
 
 /**
- * Implements hook_install().
- */
-function twitter_cards_install() {
-  // Set a sitewide default twitter account that content is displayed as from.
-  variable_set('twitter_cards_sitewide', 'drupal');
-}
-
-/**
  * Implements hook_uninstall().
  */
 function twitter_cards_uninstall() {
