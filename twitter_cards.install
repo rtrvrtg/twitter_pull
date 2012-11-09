@@ -17,6 +17,7 @@ function twitter_cards_uninstall() {
   foreach ($node_types as $key => $value) {
     variable_del('twitter_cards' . $key . '_card_type');
     variable_del('twitter_cards' . $key . '_image_field');
+    variable_del('twitter_cards' . $key . '_text_field');
     variable_del('twitter_cards' . $key . '_post_date');
     variable_del('twitter_cards' . $key . '_sitewide');
   }

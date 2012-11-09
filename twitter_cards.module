@@ -64,12 +64,24 @@ function twitter_cards_settings() {
     $image_fields = array();
     $image_fields['logo'] = 'Use default generic image';
 
+    // Do the same for text fields.
+    $text_fields = array();
+    $image_fields[variable_get('site_name')] = 'Use the site name (' . variable_get('site_name') . ')';
+
     // Get fields of each content type and loop through to find image fields.
     $fields_info = field_info_instances('node', $key);
     foreach ($fields_info as $field_name => $data) {
       $field_info = field_info_field($field_name);
-      if ($field_info['type'] == 'image') {
-        $image_fields[$field_info['field_name']] = $data['label'];
+
+      switch ($field_info['type']) {
+        case 'image':
+          $image_fields[$field_info['field_name']] = $data['label'];
+          break;
+        case 'text':
+        case 'text_long':
+        case 'text_with_summary':
+          $text_fields[$field_info['field_name']] = $data['label'];
+          break;
       }
     }
 
@@ -78,7 +90,7 @@ function twitter_cards_settings() {
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#title' => t($value->name),
+      '#title' => t(check_plain($value->name)),
     );
 
     $form[$key][$form_item_preffix . $key . '_card_type'] = array(
@@ -97,6 +109,14 @@ function twitter_cards_settings() {
       '#type' => 'select',
       '#options' => $image_fields,
       '#default_value' => variable_get($form_item_preffix . $key . '_image_field', ''),
+    );
+
+    $form[$key][$form_item_preffix . $key . '_text_field'] = array(
+      '#title' => t('Select text field'),
+      '#description' => t('Which text field on this content type should be used as the summary text on Twitter. If there is no field or one is not selected then the site name will be used.'),
+      '#type' => 'select',
+      '#options' => $text_fields,
+      '#default_value' => variable_get($form_item_preffix . $key . '_text_field', variable_get('site_name')),
     );
 
     /*
@@ -157,11 +177,28 @@ function twitter_cards_preprocess_node(&$variables) {
   drupal_add_html_head($element, 'twitter_cards_title');
 
   // Example: twitter:description.
+
+  // Get the first value of the chosen text field.
+  variable_get('twitter_cards_' . $variables['type'] . '_text_field', variable_get('site_name'));
+  $card_desc_field = variable_get('twitter_cards_' . $variables['type'] . '_text_field', '');
+
+  // Check if a field was selected otherwise use the site_name var.
+  if ($card_desc_field != '') {
+    // Some fields seem to have a different structure around the language.
+    $card_description = $variables[$card_desc_field][$variables['language']][0]['safe_value'];
+    // So we provide a fallback option
+    if ($card_description == '') {
+      $card_description = $variables[$card_desc_field][0]['safe_value'];
+    }
+  } else {
+    $card_description = variable_get('site_name', '');
+  }
+
   $element = array(
     '#tag' => 'meta',
     '#attributes' => array(
       'name' => 'twitter:description',
-      'content' => trim(text_summary(strip_tags($variables['body'][0]['value']), NULL, 200)),
+      'content' => trim(text_summary(strip_tags($card_description), NULL, 200)),
     ),
   );
   drupal_add_html_head($element, 'twitter_cards_description');
@@ -169,9 +206,11 @@ function twitter_cards_preprocess_node(&$variables) {
   // Content type image settings.
   $image_field = variable_get('twitter_cards_' . $variables['type'] . '_image_field', 'logo');
 
+  $image_path_default = file_create_url(drupal_get_path('module', 'twitter_cards') . '/logo.png');
+
   if ($image_field == 'logo') {
     // Use the site logo if set.
-    $image_path = file_create_url(drupal_get_path('module', 'twitter_cards') . '/logo.png');
+    $image_path = $image_path_default;
   }
   else {
     // Use the entity field.
@@ -212,13 +251,14 @@ function twitter_cards_preprocess_node(&$variables) {
         }
       }
       else {
-        $image_path = file_create_url(drupal_get_path('module', 'twitter_cards') . '/logo.png');
+        $image_path = $image_path_default;
       }
     }
   }
 
+  // Extra check to make sure we have an image.
   if (!isset($image_path)) {
-    $image_path = file_create_url(drupal_get_path('module', 'twitter_cards') . '/logo.png');
+    $image_path = $image_path_default;
   }
 
   // twitter:image.
