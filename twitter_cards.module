@@ -183,7 +183,7 @@ function twitter_cards_preprocess_node(&$variables) {
   $card_desc_field = variable_get('twitter_cards_' . $variables['type'] . '_text_field', '');
 
   // Check if a field was selected otherwise use the site_name var.
-  if ($card_desc_field != '') {
+  if ($card_desc_field != '' && isset($variables[$card_desc_field])) {
     // Some fields seem to have a different structure around the language.
     $card_description = $variables[$card_desc_field][$variables['language']][0]['safe_value'];
     // So we provide a fallback option.
@@ -213,7 +213,7 @@ function twitter_cards_preprocess_node(&$variables) {
     // Use the site logo if set.
     $image_path = $image_path_default;
   }
-  else {
+  else if (isset($variables[$image_field])) {
     // Use the entity field.
     foreach ($variables[$image_field] as $key => $value) {
 
@@ -255,6 +255,9 @@ function twitter_cards_preprocess_node(&$variables) {
         $image_path = $image_path_default;
       }
     }
+  }
+  else {
+    $image_path = $image_path_default;
   }
 
   // Extra check to make sure we have an image.
