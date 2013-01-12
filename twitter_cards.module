@@ -181,14 +181,15 @@ function twitter_cards_preprocess_node(&$variables) {
   // Get the first value of the chosen text field.
   variable_get('twitter_cards_' . $variables['type'] . '_text_field', variable_get('site_name'));
   $card_desc_field = variable_get('twitter_cards_' . $variables['type'] . '_text_field', '');
+  $lang = $variables['language'];
 
   // Check if a field was selected otherwise use the site_name var.
   if ($card_desc_field != '' && isset($variables[$card_desc_field])
-     && isset($variables[$card_desc_field][$variables['language']])) {
+     && isset($variables[$card_desc_field][$lang])) {
     // Some fields seem to have a different structure around the language.
     $card_description = '';
-    if (!empty($variables[$card_desc_field][$variables['language']])) {
-      $card_description = @$variables[$card_desc_field][$variables['language']][0]['safe_value'];
+    if (!empty($variables[$card_desc_field][$lang])) {
+      $card_description = @$variables[$card_desc_field][$lang][0]['safe_value'];
     }
     
     // So we provide a fallback option.
